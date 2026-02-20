@@ -16,17 +16,28 @@ A spring-loaded feed arm guides filament from the spool to the extruder through 
 - **Serial command interface** for tuning parameters and pot calibration
 - **3D printable** — OpenSCAD parametric models included for all mechanical parts
 
-## Hardware
+## Bill of Materials
 
-| Component | Qty | Purpose |
-|-----------|-----|---------|
-| ESP32-S3 | 1 | Controller (any ESP32 with ADC works) |
-| MG996R servo | 2 | Feed arm + tension arm |
-| 16mm rotary pot | 2 | Angle feedback (D-shaft, linear taper) |
-| Reed switch | 1 | Filament movement detection |
-| 6mm disc magnet | 1 | On guide wheel for reed switch |
-| 625ZZ bearing | 2 | Guide wheel axle |
-| Extension spring | 1 | Connects feed arm to tension arm |
+### Electronics (DigiKey)
+
+| Part | DigiKey P/N | Qty | ~Price | Notes |
+|------|------------|-----|--------|-------|
+| ESP32-S3-DEVKITC-1-N8R8 | [2768-ESP32-S3-DEVKITC-1-N8R8-ND](https://www.digikey.com/en/products/detail/espressif-systems/ESP32-S3-DEVKITC-1-N8R8/15295894) | 1 | $15.00 | 8MB Flash + 8MB PSRAM. Any ESP32 with ADC works |
+| Standard Metal Gear Servo | [1528-1083-ND](https://www.digikey.com/en/products/detail/adafruit-industries-llc/1142/5154658) | 2 | $19.95 | Adafruit 1142. Or MG996R from Amazon (~$8/pair) |
+| 10K Pot, D-shaft, Linear | [987-1308-ND](https://www.digikey.com/en/products/detail/tt-electronics-bi/P160KN-0QD15B10K/2408885) | 2 | $1.59 | TT Electronics P160KN-0QD15B10K. Must be "QD" (D-shaft) |
+| Reed Switch, Glass, NO | [HE502-ND](https://www.digikey.com/en/products/detail/littelfuse-inc/MDSR-4-12-23/200302) | 1 | $1.50 | Littelfuse MDSR-4-12-23 |
+| Neodymium Disc Magnet 6x3mm | [469-1017-ND](https://www.digikey.com/en/products/detail/radial-magnets-inc/8996/5126078) | 1 | $0.30 | Radial Magnets 8996 |
+| 625ZZ Ball Bearing | [1188-BEARING-625ZZ-ND](https://www.digikey.com/en/products/detail/olimex-ltd/BEARING-625ZZ/21662104) | 2 | $0.82 | 5mm bore, 16mm OD, 5mm width |
+
+### Mechanical (Amazon / McMaster-Carr)
+
+| Part | Qty | ~Price | Notes |
+|------|-----|--------|-------|
+| Extension spring, 30-50mm, light tension | 1 | $3 | Connects feed arm to tension arm |
+| M5x30mm bolt + nut | 1 | $0.50 | Guide wheel axle |
+| M3/M4 screw & nut assortment | 1 kit | $12 | Mounting hardware |
+
+**Estimated total: $45-55** (with Amazon MG996R servos) or **~$85** (all from DigiKey)
 
 ## Building
 
