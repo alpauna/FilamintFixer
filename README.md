@@ -60,9 +60,9 @@ STL files are in the `cad/` directory. Source files are parametric OpenSCAD — 
 
 | Part | File | Description |
 |------|------|-------------|
-| Base | `base.stl` | Holds both servos, pot mounts underneath, reed switch mount |
-| Feed Arm | `feed_arm.stl` | 120mm arm with D-shaft bore, spring anchor, wheel axle |
-| Tension Arm | `tension_arm.stl` | 50mm arm with D-shaft bore, spring anchor at tip |
+| Base | `base.stl` | Holds both servos side-by-side, pot mounting pads, reed switch mount |
+| Feed Arm | `feed_arm.stl` | 120mm arm with 25T spline bore, spring anchor, wheel axle, filament retainer |
+| Tension Arm | `tension_arm.stl` | 50mm arm with 25T spline bore, spring anchor at tip |
 | Guide Wheel | `guide_wheel.stl` | 25mm grooved wheel with 625ZZ bearing pockets |
 
 To regenerate STLs from source:

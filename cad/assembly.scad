@@ -25,6 +25,9 @@ servo0_x = base_w/2 + servo_gap/2 + servo_shaft_offset;
 servo0_y = base_wall + servo_body_w/2;
 servo0_z = 3 + servo_tab_y + servo_tab_h;  // base_floor + tab_y + tab_h
 
+// Arm Z position — sits on top of servo body
+arm_z = 3 + servo_body_h;  // base_floor + servo_body_h = 39.5mm
+
 // Servo1 (tension) position
 servo1_x = base_w/2 - servo_gap/2 - servo_body_w + servo_shaft_offset;
 servo1_y = servo0_y;
@@ -55,7 +58,7 @@ translate([base_w/2 - servo_gap/2 - servo_body_w, base_wall, 3])
     simple_servo();
 
 // Feed arm (rotated to current angle)
-translate([servo0_x, servo0_y, servo0_z + 4]) {
+translate([servo0_x, servo0_y, arm_z]) {
     rotate([0, 0, feed_arm_angle])
         color(color_feed_arm)
             import("feed_arm.scad");
@@ -68,7 +71,7 @@ translate([servo0_x, servo0_y, servo0_z + 4]) {
 }
 
 // Tension arm
-translate([servo1_x, servo1_y, servo1_z + 4])
+translate([servo1_x, servo1_y, arm_z])
     rotate([0, 0, tension_arm_angle])
         color(color_tension_arm)
             import("tension_arm.scad");
@@ -83,9 +86,9 @@ tension_spring_y = servo1_y + tension_arm_length * sin(tension_arm_angle);
 
 color(color_spring) {
     hull() {
-        translate([feed_spring_x, feed_spring_y, servo0_z + 7])
+        translate([feed_spring_x, feed_spring_y, arm_z + 3])
             sphere(d=2);
-        translate([tension_spring_x, tension_spring_y, servo1_z + 7])
+        translate([tension_spring_x, tension_spring_y, arm_z + 3])
             sphere(d=2);
     }
 }
@@ -96,15 +99,15 @@ color(color_filament, 0.5) {
     wheel_y = servo0_y + arm_length * sin(feed_arm_angle);
     // From spool (far right) to wheel to extruder (below)
     hull() {
-        translate([wheel_x, wheel_y + 60, servo0_z + 10])
+        translate([wheel_x, wheel_y + 60, arm_z + 6])
             sphere(d=filament_dia);
-        translate([wheel_x, wheel_y, servo0_z + 10])
+        translate([wheel_x, wheel_y, arm_z + 6])
             sphere(d=filament_dia);
     }
     hull() {
-        translate([wheel_x, wheel_y, servo0_z + 10])
+        translate([wheel_x, wheel_y, arm_z + 6])
             sphere(d=filament_dia);
-        translate([wheel_x - 30, wheel_y - 20, servo0_z - 10])
+        translate([wheel_x - 30, wheel_y - 20, arm_z - 14])
             sphere(d=filament_dia);
     }
 }

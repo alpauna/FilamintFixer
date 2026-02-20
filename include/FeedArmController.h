@@ -74,6 +74,7 @@ private:
     float _feedArmAngle = 90.0f;      // actual angle from pot
     float _tensionArmAngle = 80.0f;   // actual angle from pot
     float _tensionAngle = 80.0f;      // commanded tension angle
+    float _savedTensionAngle = 80.0f; // tension angle saved before relaxing for unstick
     uint16_t _rawFeedPot = 0;
     uint16_t _rawTensionPot = 0;
 

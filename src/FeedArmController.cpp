@@ -88,8 +88,14 @@ void FeedArmController::update() {
         break;
 
     case FeedArmState::UNSTICKING:
-        // Attach servo and drive to unstick angle to yank filament free.
+        // Relax tension servo first so feed arm doesn't fight spring + jam.
+        // Then attach feed servo and drive to unstick angle.
         if (!_feedServoAttached) {
+            _savedTensionAngle = _tensionAngle;
+            _tensionServo.write((int)_cfg.tensionAngleMin);
+            Serial.printf("[FeedArm] Tension relaxed: %.0f° -> %.0f° (min)\n",
+                          _savedTensionAngle, _cfg.tensionAngleMin);
+
             _feedServo.attach(_feedServoPin, 500, 2500);
             _feedServoAttached = true;
             Serial.println("[FeedArm] Servo ATTACHED — driving to unstick angle");
@@ -125,6 +131,10 @@ void FeedArmController::update() {
                 _feedServoAttached = false;
                 Serial.println("[FeedArm] Servo DETACHED — back to monitoring");
             }
+            // Restore tension servo to its pre-unstick angle.
+            _tensionAngle = _savedTensionAngle;
+            _tensionServo.write((int)_tensionAngle);
+            Serial.printf("[FeedArm] Tension restored to %.0f°\n", _tensionAngle);
             // Reset reed switch to avoid false stall after unstick action.
             if (_reed) _reed->reset();
             transitionTo(FeedArmState::MONITORING);

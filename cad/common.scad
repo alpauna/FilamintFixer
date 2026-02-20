@@ -46,6 +46,10 @@ dshaft_dia = 6.0;        // round diameter
 dshaft_flat = 4.5;       // flat-to-round distance (D cut depth)
 dshaft_len = 10.0;       // length extending below arm hub
 
+// --- Servo spline bore (25T spline coupling) ---
+servo_spline_bore = servo_spline_dia + tol_tight;  // 5.95mm
+spline_engage_depth = 4.0;                          // blind bore depth
+
 // --- Reed switch (glass body, typical) ---
 reed_body_l = 14.0;      // glass body length
 reed_body_dia = 2.5;     // glass body diameter

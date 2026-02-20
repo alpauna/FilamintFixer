@@ -1,7 +1,7 @@
 // tension_arm.scad — Tension arm that attaches to Servo1
 // Shorter arm that anchors the other end of the spring.
 // Servo1 holds this arm locked during printing to set spring tension.
-// D-shaft coupling at the base for potentiometer feedback.
+// Blind 25T spline bore couples directly to servo output shaft.
 
 include <common.scad>
 
@@ -16,28 +16,10 @@ horn_screw_dia = m3_hole;
 // Spring anchor at the tip
 spring_hole_dia = 3.5;      // same as feed arm spring hole
 
-// D-shaft bore (couples to potentiometer shaft below base)
-dshaft_bore_dia = dshaft_dia + tol_tight;
-dshaft_bore_flat = dshaft_flat + tol_tight;
-
-// --- D-shaft profile module ---
-module d_shaft_bore(dia, flat, depth) {
-    intersection() {
-        cylinder(d=dia, h=depth);
-        translate([-(dia/2), -(dia/2), 0])
-            cube([dia, flat, depth]);
-    }
-    difference() {
-        cylinder(d=dia, h=depth);
-        translate([-(dia/2), flat - dia/2, -0.1])
-            cube([dia, dia, depth + 0.2]);
-    }
-}
-
 module tension_arm() {
     difference() {
         union() {
-            // Hub
+            // Hub (attaches to servo 25T spline)
             cylinder(d=hub_dia, h=hub_height);
 
             // Arm body
@@ -51,20 +33,15 @@ module tension_arm() {
             // Tip boss
             translate([arm_length, 0, 0])
                 cylinder(d=10, h=arm_thickness);
-
-            // D-shaft extension below hub
-            translate([0, 0, -dshaft_len])
-                cylinder(d=hub_dia - 2, h=dshaft_len);
         }
 
-        // D-shaft bore (through entire hub + extension)
-        translate([0, 0, -dshaft_len - 0.1])
-            d_shaft_bore(dshaft_bore_dia, dshaft_bore_flat,
-                         hub_height + dshaft_len + 0.2);
+        // Blind spline bore (25T servo spline coupling)
+        translate([0, 0, -0.1])
+            cylinder(d=servo_spline_bore, h=spline_engage_depth + 0.1);
 
-        // Horn screw hole
-        translate([0, 0, -dshaft_len - 0.1])
-            cylinder(d=horn_screw_dia, h=hub_height + dshaft_len + 1);
+        // Horn screw hole (through hub center, for M3 screw into servo)
+        translate([0, 0, -0.1])
+            cylinder(d=horn_screw_dia, h=hub_height + 0.2);
 
         // Spring anchor hole at tip
         translate([arm_length, 0, -0.1])
@@ -76,4 +53,4 @@ tension_arm();
 
 echo("=== Tension Arm ===");
 echo(str("Length: ", arm_length, " mm"));
-echo(str("D-shaft bore: ", dshaft_bore_dia, " mm"));
+echo(str("Spline bore: ", servo_spline_bore, " mm x ", spline_engage_depth, " mm deep"));

@@ -1,6 +1,6 @@
-// base.scad — Main base plate holding two MG996R servos
+// base.scad — Main base plate holding two MG996R servos side-by-side
 // Servo0 (feed arm) on the right, Servo1 (tension/spring) on the left.
-// Potentiometer mounts coaxial with each servo shaft (below base).
+// Flat pot mounting pads on base surface behind servos for future sensor bracket.
 // Reed switch mount near guide wheel position.
 
 include <common.scad>
@@ -10,11 +10,12 @@ base_wall = 3.0;             // wall thickness around servos
 base_floor = 3.0;            // floor thickness
 servo_gap = 5.0;             // gap between the two servos
 corner_r = 3.0;              // corner rounding radius
+lip_height = 5.0;            // wall lip above servo tabs
 
 // Calculated dimensions
-base_w = servo_tab_w + base_wall * 2;  // total width
-base_l = servo_body_l * 2 + servo_gap + base_wall * 2; // two servos front-to-back
-base_h = servo_tab_y + servo_tab_h + base_wall; // height to hold servos at tab level
+base_w = servo_tab_w + base_wall * 2;              // total width
+base_l = servo_body_l + base_wall * 2;             // single servo front-to-back (side-by-side layout)
+base_h = base_floor + servo_tab_y + servo_tab_h + tol + lip_height; // height with lip above tabs
 
 // ESP32 mounting area behind servos
 esp_mount_l = 30;
@@ -22,10 +23,13 @@ esp_mount_w = base_w;
 
 total_l = base_l + esp_mount_l;
 
-// --- Pot mount parameters ---
-pot_tower_h = pot_body_h + 3;  // tower extends below base to hold pot
-pot_tower_od = pot_body_dia + 6; // tower outer diameter
-pot_mount_plate_t = 3.0;      // mounting plate thickness
+// --- Tab support thickness ---
+tab_support_t = 2.0;
+
+// --- Pot mounting pad (flat pad with M3 holes on base surface) ---
+pot_pad_w = 20;              // pad width
+pot_pad_l = 14;              // pad length (front-to-back)
+pot_pad_h = 2.0;             // pad raised height above base top
 
 // --- Reed switch mount ---
 reed_mount_w = 8;
@@ -63,29 +67,23 @@ module mg996r_cutout() {
         }
     }
 
-    // Shaft clearance hole (through the floor for D-shaft to pot below)
-    translate([servo_shaft_offset, servo_body_w/2, -pot_tower_h - 1])
-        cylinder(d=pot_bushing_dia + tol*2, h=base_h + pot_tower_h + 10);
-
     // Wire channel out the back
     translate([servo_body_w/2 - 4, servo_body_l - 1, base_floor + 5])
         cube([8, base_wall + 2, 10]);
 }
 
-// Potentiometer mounting tower (hangs below base, coaxial with servo shaft)
-module pot_tower() {
+// Pot mounting pad — flat raised pad with M3 holes for future sensor bracket
+module pot_mounting_pad() {
     difference() {
-        // Tower body (cylindrical, extends below base)
-        translate([0, 0, -pot_tower_h])
-            cylinder(d=pot_tower_od, h=pot_tower_h);
+        // Raised pad
+        translate([-pot_pad_w/2, -pot_pad_l/2, 0])
+            cube([pot_pad_w, pot_pad_l, pot_pad_h]);
 
-        // Pot bushing hole (through tower center)
-        translate([0, 0, -pot_tower_h - 0.1])
-            cylinder(d=pot_bushing_dia + tol, h=pot_tower_h + 0.2);
-
-        // Anti-rotation tab slot (small flat cut in the tower bore)
-        translate([-pot_tab_w/2, pot_bushing_dia/2 - 0.5, -pot_tower_h - 0.1])
-            cube([pot_tab_w, pot_tab_depth + 0.5, pot_tower_h + 0.2]);
+        // Two M3 mounting holes
+        for (dx = [-pot_pad_w/2 + 3.5, pot_pad_w/2 - 3.5]) {
+            translate([dx, 0, -1])
+                cylinder(d=m3_hole, h=pot_pad_h + base_floor + 2);
+        }
     }
 }
 
@@ -115,7 +113,7 @@ module reed_switch_mount() {
 }
 
 module base() {
-    // Servo shaft positions (for pot tower placement)
+    // Servo shaft positions (for pot pad placement)
     servo0_x = base_w/2 + servo_gap/2 - tol + servo_shaft_offset;
     servo0_y = base_wall + servo_body_w/2;
     servo1_x = base_w/2 - servo_gap/2 - servo_body_w + tol + servo_shaft_offset;
@@ -126,18 +124,28 @@ module base() {
             // Main body
             rounded_rect(base_w, total_l, base_h, corner_r);
 
-            // Pot tower for Servo0 (feed arm)
-            translate([servo0_x, servo0_y, 0])
-                pot_tower();
+            // Pot mounting pad for Servo0 (feed arm) — on base surface behind servo
+            translate([servo0_x, base_l + 7, base_h])
+                pot_mounting_pad();
 
-            // Pot tower for Servo1 (tension arm)
-            translate([servo1_x, servo1_y, 0])
-                pot_tower();
+            // Pot mounting pad for Servo1 (tension arm) — on base surface behind servo
+            translate([servo1_x, base_l + 7, base_h])
+                pot_mounting_pad();
 
             // Reed switch mount (positioned at front-right of base,
             // near where the feed arm's guide wheel passes)
             translate([base_w - mount_inset - 2, base_wall + servo_body_l + 3, base_h])
                 reed_switch_mount();
+
+            // Tab supports (bridges under servo tabs)
+            for (side = [0, 1]) {
+                sx = side == 0 ?
+                    base_w/2 + servo_gap/2 - tol :
+                    base_w/2 - servo_gap/2 - servo_body_w + tol;
+                translate([sx - (servo_tab_w - servo_body_w)/2, base_wall,
+                           base_floor + servo_tab_y - tab_support_t])
+                    cube([servo_tab_w + tol*2, servo_body_l + tol*2, tab_support_t]);
+            }
         }
 
         // Servo0 pocket (feed arm — right side)
@@ -169,21 +177,11 @@ module base() {
                     cylinder(d=m3_hole, h=base_floor + 2);
             }
 
-        // Weight reduction — pocket in the bottom (avoid pot tower areas)
+        // Weight reduction — pocket in the bottom (avoid mounting areas)
         translate([base_wall + 5, base_wall + 5, -0.01])
             rounded_rect(base_w - base_wall*2 - 10,
                          base_l - base_wall*2 - 10,
                          base_floor - 1.2, 2);
-    }
-
-    // Tab supports (bridges under servo tabs)
-    for (side = [0, 1]) {
-        sx = side == 0 ?
-            base_w/2 + servo_gap/2 - tol :
-            base_w/2 - servo_gap/2 - servo_body_w + tol;
-        translate([sx - (servo_tab_w - servo_body_w)/2, base_wall,
-                   base_floor + servo_tab_y - 0.5])
-            cube([servo_tab_w + tol*2, servo_body_l + tol*2, 0.5]);
     }
 }
 
@@ -191,7 +189,9 @@ base();
 
 echo("=== Base Dimensions ===");
 echo(str("Width: ", base_w, " mm"));
-echo(str("Length: ", total_l, " mm"));
+echo(str("Length (servo area): ", base_l, " mm"));
+echo(str("Length (total): ", total_l, " mm"));
 echo(str("Height: ", base_h, " mm"));
-echo(str("Pot tower depth: ", pot_tower_h, " mm below base"));
+echo(str("Lip above tabs: ", lip_height, " mm"));
+echo("Pot mounting pads on base surface (ESP mount area)");
 echo("Reed switch mount on top-right corner");
